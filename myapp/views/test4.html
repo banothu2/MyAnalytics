@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font: 10px sans-serif;
+  shape-rendering: crispEdges;
+}
+
+.grid-background {
+  fill: #444;
+}
+
+.grid line {
+  stroke: #fff;
+}
+
+.grid .minor line {
+  stroke-opacity: .5;
+}
+
+.grid text {
+  display: none;
+}
+
+.axis line {
+  stroke: #000;
+}
+
+.axis path,
+.grid path {
+  display: none;
+}
+
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+var margin = {top: 200, right: 10, bottom: 200, left: 10},
+    width = 1200 - margin.right - margin.left,
+    height = 500 - margin.top - margin.bottom;
+
+var values = d3.range(1000).map(d3.random.logNormal(Math.log(800), .4));
+
+var x = d3.time.scale()
+    .domain([0, Math.ceil(d3.max(values) * 26000)])
+    .range([0, width]);
+
+
+var y = d3.scale.linear()
+    .range([0, height]);
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.right + margin.left)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom")
+    .ticks(d3.time.hour, 1)
+    .tickFormat(d3.time.format.utc('%H:%M'));
+
+
+/*
+var circle = svg.selectAll("circle")
+    .data([32, 57, 112, 293]);
+
+var circleEnter = circle.enter().append("circle");
+*/
+
+var rectangle = svg.selectAll("rect")
+  .data([0, 120*6])
+
+var rectangleEnter = rectangle.enter().append("rect")
+  .attr("x", function(d, i){
+    return d;
+  })
+  .attr("y", 50)
+    .attr("width", 500)
+    .attr("height", 50);
+
+
+svg.append("g")
+    .attr("class", "grid")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.svg.axis().scale(x).ticks(10).tickSize(-height))
+  .selectAll(".tick")
+    .data(x.ticks(10), function(d) { return d; })
+  .exit()
+    .classed("minor", true);
+
+
+
+svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis);
+
+</script>

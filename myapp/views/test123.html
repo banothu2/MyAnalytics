@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style>
+
+body {
+  font: 10px sans-serif;
+  shape-rendering: crispEdges;
+}
+
+.grid-background {
+  fill: #ddd;
+}
+
+.grid line {
+  stroke: #fff;
+}
+
+.grid .minor line {
+  stroke-opacity: .5;
+}
+
+.grid text {
+  display: none;
+}
+
+.axis line {
+  stroke: #000;
+}
+
+.axis path,
+.grid path {
+  display: none;
+}
+
+</style>
+
+<div id="horizontalBar"></div>
+<div id="tooltip" style="height: 20px; padding-left: 20px"></div>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+var data = [{"symbol": "test", "value": 20, "color": "red"}, {"symbol": "tessst", "value": 25, "color": "blue"}, {"symbol": "aa", "value": 21, "color": "red"}, {"symbol": "test", "value": 20, "color": "red"}, {"symbol": "test", "value": 20, "color": "red"}, {"symbol": "test", "value": 20, "color": "red"}];
+
+var n = data.length-1,
+m = 1,
+stack = d3.layout.stack(),
+labels = data.map(function(d) {return "USD";}),
+layers = stack(d3.range(n).map(function(d, i){
+var a = [];
+for(var k = 0; k < m; ++k){
+a[k] = {x: k, y: data[i+1]['value'], value: data[i+1]["symbol"], notional: data[i+1]["value"],
+color: data[i+1]["color"]}
+}
+return a;
+})),
+
+
+yGroupMax = d3.max(layers, function(layer){
+	return d3.min(layer, function(d){
+		return d.y;
+	})
+}),
+yStackMax = d3.max(layers, function(layer){
+	return d3.max(layer, function(d){
+		return d.y0 + d.y;
+	});
+});
+
+
+var margin = {top: 10, right: 10, bottom: 5, left: 100},
+	width = 1000 - margin.left - margin.right,
+	height = 60 - margin.top - margin.bottom;
+
+var y = d3.scale.ordinal()
+	.domain(d3.range(m))
+	.rangeRoundBands([2, height], .08);
+
+var x = d3.scale.linear()
+	.domain([0, yStackMax])
+	.range([0, width])
+
+var colorRED = d3.scale.linear()
+	.domain([0, n-1])
+	.range(["#c0392b", "#ecf0f1"])
+
+var colorBLUE = d3.scale.linear()
+	.domain([0, n-1])
+	.range(["#2980b9", "#4B77BE"])
+
+
+var colorRed = d3.scale.linear()
+	.domain([0, n-1])
+	.range(["#4B77BE", "#c0392b"])
+
+var svg = d3.select("#horizontalBar").append("svg")
+	.attr("width", width + margin.left + margin.right)
+	.attr("height", height + margin.top + margin.bottom)
+	.append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+
+
+
+var tooltip = d3.select("body").selectAll("#tooltip")
+	.append("div")
+	.style("position", "absolute")
+	.style("z-index", "10")
+	.style("visibility", "hidden")
+	.text("a simple tooltip");
+
+
+
+var layer = svg.selectAll(".layer")
+	.data(layers)
+	.enter().append("g")
+		.attr("class", "layer")
+		.style("fill", function(d, i){
+			if(d[0].color == "red"){
+				return colorRED(i)
+			} else {
+				return colorBLUE(i);
+			}
+		})
+		.style("opacity", 0.8)
+
+layer.selectAll("rect")
+	.data(function(d){ return d; })
+	.enter().append("rect")
+	.attr("y", function(d){
+		return y(d.x);
+	})
+	.attr("x", function(d){ 
+		return x(d.y0);
+	})
+	.attr("height", y.rangeBand())
+	.attr("width", function(d){
+		return x(d.y)
+	})
+	.on("mouseover", function(d) {
+		d3.select(this).transition().duration(200)
+		.style("fill", "#1bc3a2")
+		tooltip.style("visibility", "visible").text("Selected: " + d.value )
+	})
+	.on("mouseout", function(){
+		d3.select(this).transition().duration(400)
+		.style("fill", function(d, i){
+			return this.color;
+		})
+		tooltip.style("visibility", "hidden")
+	})
+
+</script>
+
+
+
+
