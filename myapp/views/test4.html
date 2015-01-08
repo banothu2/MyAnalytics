@@ -34,18 +34,21 @@ body {
 
 </style>
 <body>
+<div id="tooltip" style="height: 20px; padding-left: 20px"></div>
+
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
 
-var margin = {top: 200, right: 10, bottom: 200, left: 10},
-    width = 1200 - margin.right - margin.left,
-    height = 500 - margin.top - margin.bottom;
+var scalingFactor = 0.8;
+var margin = {top: 0, right: 20, bottom: 20, left: 20},
+    width = (1480 - margin.right - margin.left)*scalingFactor,
+    height = 120 - margin.top - margin.bottom;
 
-var values = d3.range(1000).map(d3.random.logNormal(Math.log(800), .4));
+var values = d3.range(3330);
 
 var x = d3.time.scale()
     .domain([0, Math.ceil(d3.max(values) * 26000)])
-    .range([0, width]);
+    .range([0, 1440*scalingFactor+2]);
 
 
 var y = d3.scale.linear()
@@ -72,22 +75,55 @@ var circle = svg.selectAll("circle")
 var circleEnter = circle.enter().append("circle");
 */
 
+
+var tooltip = d3.select("body").selectAll("#tooltip")
+  .append("div")
+  .style("position", "absolute")
+  .style("z-index", "10")
+  .style("visibility", "hidden")
+  .text("a simple tooltip");
+
+
+var hoursData = [
+      {"startTime": 0, "length": 20, "color": "orange"},
+      {"startTime": 60, "length": 60, "color": "red"},
+      {"startTime": 120, "length": 180, "color": "green"},
+      {"startTime": 1380, "length": 60, "color": "blue"}
+    ]
+
 var rectangle = svg.selectAll("rect")
-  .data([0, 120*6])
+  .data(hoursData)
 
 var rectangleEnter = rectangle.enter().append("rect")
   .attr("x", function(d, i){
-    return d;
+    return d.startTime*scalingFactor;
   })
   .attr("y", 50)
-    .attr("width", 500)
-    .attr("height", 50);
+  .attr("width", function(d, i){
+      return d.length*scalingFactor;
+  })
+  .attr("height", 50)
+  .attr("fill", function(d, i){
+    return d.color;
+  })
+  .on("mouseover", function(d) {
+    d3.select(this).transition().duration(200)
+    .style("fill", "#1bc3a2")
+    tooltip.style("visibility", "visible").text("Selected: " + d.startTime )
+  })
+  .on("mouseout", function(){
+    d3.select(this).transition().duration(400)
+    .style("fill", function(d, i){
+      return this.color;
+    })
+    tooltip.style("visibility", "hidden")
+  })
 
 
 svg.append("g")
     .attr("class", "grid")
     .attr("transform", "translate(0," + height + ")")
-    .call(d3.svg.axis().scale(x).ticks(10).tickSize(-height))
+    .call(d3.svg.axis().scale(x).ticks(5).tickSize(-height))
   .selectAll(".tick")
     .data(x.ticks(10), function(d) { return d; })
   .exit()
