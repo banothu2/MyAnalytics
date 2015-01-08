@@ -42,7 +42,7 @@ body {
 var scalingFactor = 0.8;
 var margin = {top: 0, right: 20, bottom: 20, left: 20},
     width = (1480 - margin.right - margin.left)*scalingFactor,
-    height = 120 - margin.top - margin.bottom;
+    height = 110 - margin.top - margin.bottom;
 
 var values = d3.range(3330);
 
@@ -102,7 +102,7 @@ var rectangleEnter = rectangle.enter().append("rect")
   .attr("width", function(d, i){
       return d.length*scalingFactor;
   })
-  .attr("height", 50)
+  .attr("height", 40)
   .attr("fill", function(d, i){
     return d.color;
   })
