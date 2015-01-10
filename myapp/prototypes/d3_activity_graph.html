@@ -1,53 +1,75 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<style>
+<html lang="en" ng-app="vending">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- <link rel="icon" href="favicon.ico"> -->
 
-html {
-  position: relative;
-  min-height: 100%;
-}
+    <title>D3 Activity Graph</title>
 
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <style>
 
+      html {
+        position: relative;
+        min-height: 100%;
+      }
 
-  div {
-      color: white;
-  }
-  body {
-    font: 10px sans-serif;
-    shape-rendering: crispEdges;
-    margin-bottom: 60px;
-    background-color:#19B5FE;
-  }
+      div {
+          color: white;
+      }
+      body {
+        font: 10px sans-serif;
+        shape-rendering: crispEdges;
+        margin-bottom: 60px;
+        background-color:#000;
+      }
 
-  .grid-background {
-    fill: #444;
-  }
+      /* CSS for activity graph */
+      .grid-background {
+        fill: #444;
+      }
+      .grid line {
+        stroke: #fff;
+      }
+      .grid .minor line {
+        stroke-opacity: .5;
+      }
+      .grid text {
+        display: none;
+      }
+      .axis line {
+        stroke: #fff;
+      }
+      .axis path,
+      .grid path {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="jumbotron" style="background-color:#9b59b6">
+      <div class="container">
+        <h1>D3 Activity Graph</h1>
+        <p>Takes the following as input: activity, startTime, length, color</p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2">
+        <h4 align="center">Saturday, January 10th</h4>
+        <h5 id="tooltip" style="height: 20px; padding-left: 20px"></h5>
+      </div>
+      <div class="col-md-10">
+        <div id="myHours"></div>
 
-  .grid line {
-    stroke: #fff;
-  }
+      </div>
+    </div>
 
-  .grid .minor line {
-    stroke-opacity: .5;
-  }
-
-  .grid text {
-    display: none;
-  }
-
-  .axis line {
-    stroke: #fff;
-  }
-
-  .axis path,
-  .grid path {
-    display: none;
-  }
-</style>
-<body>
-  <div id="myHours"></div>
-  <div id="tooltip" style="height: 20px; padding-left: 20px"></div>
-
+  </body>
   <script src="http://d3js.org/d3.v3.min.js"></script>
   <script>
 
@@ -56,8 +78,8 @@ html {
           {"activity": "Sleep", "startTime": 130, "length": 661, "color": "#2ecc71"},
           {"activity": "Hygiene", "startTime": 791, "length": 54, "color": "#3498db"},
           {"activity": "Errand", "startTime": 791+54, "length": 20, "color": "#34495e"},
-          {"activity": "MyAnalytics", "startTime": 60*(14)+25, "length": 30, "color": "#95a5a6"},
-          {"activity": "Not filled in yet", "startTime": 60*(14)+55, "length": (60*(18)+30)-(60*14+55), "color": "#ecf0f1"},
+          {"activity": "MyAnalytics", "startTime": 60*(14)+25, "length": 180, "color": "#95a5a6"},
+          {"activity": "Not filled in yet", "startTime": 60*(14)+55+150, "length": (60*(18)+30)-(60*14+55+150), "color": "#ecf0f1"},
           {"activity": "Transportation", "startTime": 60*(12+6)+30, "length": 40, "color": "#9b59b6"},
           {"activity": "Errand", "startTime": 60*(12+7)+10, "length": 30, "color": "#34495e"},
           {"activity": "Socializing", "startTime": 60*(12+7)+40, "length": 20, "color": "#e74c3c"},
@@ -66,11 +88,11 @@ html {
           {"activity": "Socializing", "startTime": 60*(12+10)+45, "length": 75, "color": "#1abc9c"}
         ]
 
-    var scalingFactor = 0.9; // Scales the graph to fit the browser page
+    var scalingFactor = 0.9*(10/12); // Scales the graph to fit the browser page
 
     var margin = {top: 0, right: 20, bottom: 20, left: 20};
     var width = (1480 - margin.right - margin.left)*scalingFactor;
-    var height = 50 - margin.top - margin.bottom;
+    var height = 70 - margin.top - margin.bottom;
 
     var values = d3.range(3330);
 
@@ -112,14 +134,14 @@ html {
       .attr("width", function(d, i){
           return d.length*scalingFactor;
       })
-      .attr("height", 30)
+      .attr("height", 50)
       .attr("fill", function(d, i){
         return d.color;
       })
       .on("mouseover", function(d) {
         d3.select(this).transition().duration(200)
         .style("fill", "#ecf0f1")
-        tooltip.style("visibility", "visible").text("Activity: " + d.activity )
+        tooltip.style("visibility", "visible").text(d.activity +" at " + Math.floor((d.startTime / 60) % 12))
       })
       .on("mouseout", function(){
         d3.select(this).transition().duration(400)
@@ -144,3 +166,5 @@ html {
         .attr("transform", "translate(0," + height + ")")
         .call(xAxis);
   </script>
+</html>
+  
